@@ -48,8 +48,8 @@ rm(LX237_before)
 LX237[["percent.mt"]] <- PercentageFeatureSet(LX237, pattern = "^MT-")
 
 # ---- Add metadata to tissue: genotype and doublet information ---- #
-# Load file with genotype information (obtained from Souporcell
-# https://github.com/wheaton5/souporcell)
+# Load file with genotype information (obtained from Souporcell)
+# https://github.com/wheaton5/souporcell
 genotype_df <- read.csv("/hpc/hub_clevers/sequencing_data/MB_single_cell/analysis/LX237/an_393/k4/clusters.tsv", 
                          sep = "\t", 
                          row.names = 1)
