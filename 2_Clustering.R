@@ -21,10 +21,7 @@ library(remotes)
 library(Seurat) 
 library(viridis) 
 library(pheatmap) 
-library(rlang) 
-
-directory <- "/hpc/hub_clevers/MB/conjunctiva/Conjunctiva_10X/Final_analysis/Analysis/Dim40/"
-setwd(directory)
+library(rlang)
 
 
 #########################################################################
