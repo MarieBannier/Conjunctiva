@@ -9,6 +9,12 @@ library(ggplot2)
 library(cowplot)
 library(umap)
 library(Matrix)
+library(RColorBrewer)
+library(goseq)
+library(org.Hs.eg.db)
+library(biomaRt)
+library(dplyr)
+library(clusterProfiler)
 
 
 #########################################################################
