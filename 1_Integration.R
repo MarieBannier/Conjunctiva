@@ -19,12 +19,8 @@ library(usethis,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
 library(remotes,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
 library(Seurat,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
 
-directory <- "/hpc/hub_clevers/MB/conjunctiva/Conjunctiva_10X/"
-setwd(directory)
-
 dir.create("Final_analysis/")
 setwd("Final_analysis/")
-
 directory <- getwd()
 
 
