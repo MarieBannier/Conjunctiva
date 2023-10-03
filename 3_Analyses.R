@@ -7,22 +7,22 @@
 # Load libraries
 #########################################################################
 
-library(viridisLite, lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
-library(crayon,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(labeling,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(farver,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(withr,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(dplyr,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(SeuratObject,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(ggplot2,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(cowplot,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(patchwork, lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(usethis,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(remotes,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/")
-library(Seurat,lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
-library(viridis, lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
-library(pheatmap, lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
-library(rlang, lib.loc="/hpc/local/CentOS7/hub_clevers/R_libs/4.1.0/") 
+library(viridisLite)
+library(crayon)
+library(labeling)
+library(farver)
+library(withr)
+library(dplyr)
+library(SeuratObject)
+library(ggplot2)
+library(cowplot)
+library(patchwork)
+library(usethis)
+library(remotes)
+library(Seurat) 
+library(viridis) 
+library(pheatmap) 
+library(rlang) 
 
 
 #directory <- "/hpc/hub_clevers/MB/conjunctiva/Conjunctiva_10X/Final_analysis/Analysis/Dim40/"
@@ -32,26 +32,23 @@ setwd(directory)
 #########################################################################
 # Load  environment
 #########################################################################
-#load("envir_with_Resolutions.RData")
 load("envir_with_newIDs.RData")
 print("Environment loaded")
-
-write.csv(rownames(dataset_combined), "universe.csv")
 
 #########################################################################
 # Plot UMAP with each resolution showing clusters and MUC5AC expression
 #########################################################################
 
-## ----  Set resolution at 2 ---- # 
-#Idents(dataset_combined) <- dataset_combined$integrated_snn_res.2
-#print(head(dataset_combined$integrated_snn_res.2))
+# ----  Set resolution at 2 ---- # 
+Idents(dataset_combined) <- dataset_combined$integrated_snn_res.2
+print(head(dataset_combined$integrated_snn_res.2))
 
 # ----  Calculate DEGs ---- #
-#dataset_combined.markers <- FindAllMarkers(dataset_combined, 
-#                                           only.pos = TRUE, 
-#                                           min.pct = 0.25, 
-#                                           logfc.threshold = 0.5)
-#write.csv(dataset_combined.markers, "markers_AllClusters.csv")
+dataset_combined.markers <- FindAllMarkers(dataset_combined, 
+                                           only.pos = TRUE, 
+                                           min.pct = 0.25, 
+                                           logfc.threshold = 0.5)
+write.csv(dataset_combined.markers, "markers_AllClusters.csv")
 
 ## ----  50 colors palette ---- #
 #colors50 <- c("#4287f5", "#F5D033", "#84C3BE", "#4287f5", "#CF3476",
@@ -681,218 +678,226 @@ colors10 <- rev(c("#EB9700", "#D93B8D", "#7C60A4", "#218A9E", "#0E5245",
 #         border_color = "black", color = colorRampPalette(c("navy", "white", "red"))(100))         
 #dev.off()
 
-
 #########################################################################
 # Effect of IL4/13 treatment
 #########################################################################
 
-## ---- Subset late ALI conditions with and without IL4/13 ---- #
-#IL_dataset <- subset(dataset_combined, subset = orig.ident %in% c("ALId17_hCjM04", "ALId17_hCjM16", "ALId17_IL4+13"))
-#
-## ---- Create a treatment metadata column ---- #
-#IL_dataset$treatment <- IL_dataset$orig.ident
-#IL_dataset$treatment[IL_dataset$orig.ident %in% c("ALId17_hCjM04", "ALId17_hCjM16")] <- "EM"
-#IL_dataset$treatment[IL_dataset$orig.ident == "ALId17_IL4+13"] <- "IL4.13"
-#
-## ---- Create a metadata column that contains both treatment and cell type information ---- #
-#IL_dataset$status <- paste0(IL_dataset@active.ident, "-", IL_dataset$treatment)
-#IL_dataset$CellType <- IL_dataset@active.ident
-#message("Metadata added")
+# ---- Subset late ALI conditions with and without IL4/13 ---- #
+IL_dataset <- subset(dataset_combined, subset = orig.ident %in% c("ALId17_hCjM04", "ALId17_hCjM16", "ALId17_IL4+13"))
+
+# ---- Create a treatment metadata column ---- #
+IL_dataset$treatment <- IL_dataset$orig.ident
+IL_dataset$treatment[IL_dataset$orig.ident %in% c("ALId17_hCjM04", "ALId17_hCjM16")] <- "EM"
+IL_dataset$treatment[IL_dataset$orig.ident == "ALId17_IL4+13"] <- "IL4.13"
+
+# ---- Create a metadata column that contains both treatment and cell type information ---- #
+IL_dataset$status <- paste0(IL_dataset@active.ident, "-", IL_dataset$treatment)
+IL_dataset$CellType <- IL_dataset@active.ident
+message("Metadata added")
 
 # ---- Obtain DEG based on IL4/13 treatment in each cell type ---- #
-#message("Calculating DEGs based on IL4/13 treatment...")
-#
-#Idents(IL_dataset) <- IL_dataset$status
-#for (i in unique(IL_dataset$CellType)) {
-#  print(i)
-#  IL_DEG <- FindMarkers(IL_dataset, ident.1 = paste0(i, "_IL4/13"), ident.2 = paste0(i, "_EM"))
-#  write.csv(IL_DEG, paste0(i, ".csv"))
-#  }
-#
-#
-## ---- Plot Dotplot with seperate conditions ---- #
-#tuft_IL <- read.csv("tuft_cells.csv", row.names = 1, header = T)
-#goblet_IL <- read.csv("goblet_cells.csv", row.names = 1, header = T)
-#keratinocytes_IL <- read.csv("keratinocytes.csv", row.names = 1, header = T)
-#basal_IL <- read.csv("basal_cells.csv", row.names = 1, header = T)
-#
-#tuft_IL <- filter(tuft_IL, p_val_adj < 0.01)
-#goblet_IL <- filter(goblet_IL, p_val_adj < 0.01)
-#keratinocytes_IL <- filter(keratinocytes_IL, p_val_adj < 0.01)
-#basal_IL <- filter(basal_IL, p_val_adj < 0.01)
-#
-#DEG_IL <- c(rownames(tuft_IL), 
-#            rownames(goblet_IL), 
-#            rownames(keratinocytes_IL), 
-#            rownames(basal_IL))
-#
-#
-#Idents(IL_dataset) <- IL_dataset$CellType
-#
-#pdf("ILeffect_DotPlot_allcells_p0,01.pdf", width = 23, height = 3.5)
-#print(DotPlot(IL_dataset, 
-#              features = unique(DEG_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#pdf("ILeffect_DotPlot_tuft_p0,01.pdf", width = 6, height = 2)
-#print(DotPlot(subset(IL_dataset, idents = "tuft-cells"), 
-#              features = rownames(tuft_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#pdf("ILeffect_DotPlot_goblet_p0,01.pdf", width = 11, height = 2)
-#print(DotPlot(subset(IL_dataset, idents = "goblet-cells"), 
-#              features = rownames(goblet_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#pdf("ILeffect_DotPlot_basal_p0,01.pdf", width = 9, height = 2)
-#print(DotPlot(subset(IL_dataset, idents = "basal-cells"), 
-#              features = rownames(basal_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#pdf("ILeffect_DotPlot_keratinocytes_p0,01.pdf", width = 10, height = 2)
-#print(DotPlot(subset(IL_dataset, idents = "keratinocytes"), 
-#              features = rownames(keratinocytes_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#tuft_IL <- filter(tuft_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
-#goblet_IL <- filter(goblet_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
-#keratinocytes_IL <- filter(keratinocytes_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
-#basal_IL <- filter(basal_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5)  %>% arrange(desc(avg_logFC))
-#
-#DEG_IL <- c(rownames(tuft_IL), 
-#            rownames(goblet_IL), 
-#            rownames(keratinocytes_IL), 
-#            rownames(basal_IL))
-#
-#pdf("ILeffect_DotPlot_fc0,5.pdf", width = 11, height = 3.5)
-#print(DotPlot(IL_dataset, 
-#              features = unique(DEG_IL),
-#              split.by = "treatment",
-#              #group.by = "CellType",
-#              dot.scale = 7,
-#              cols = c("#B6EAD7", "#0F99B2")) + 
-#              #scale_color_gradient(low = "white", high = "black") +
-#              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
-#        RotatedAxis())
-#dev.off()
-#
-#
-#av.exp_IL <- av.exp[rownames(av.exp) %in% DEG_IL,]
-#
-#Idents(IL_dataset) <- IL_dataset$CellType
-#
-#pdf("Heatmap_ILtreatment_allcells.pdf", height = 4)
-#print(DoHeatmap(subset(IL_dataset, downsample = 300), 
-#                features = unique(DEG_IL), 
-#                group.by = "CellType",
-#                label = FALSE,
-#                group.colors = colors10) + scale_fill_gradientn(colors = c("#3C9AB2", "#E8C520", "#F22300")) +
-#        theme(text = element_text(size = 6)))
-#dev.off()
-#
-#pdf("Heatmap_ILtreatment_basalcells.pdf", height = 1)
-#print(DoHeatmap(subset(IL_dataset, idents = "basal-cells"), 
-#                features = rownames(basal_IL), 
-#                group.by = "treatment",
-#                label = FALSE,
-#                group.colors = colors10) + scale_fill_gradientn(colors = c("#3C9AB2", "#E8C520", "#F22300")) +
-#        theme(text = element_text(size = 6)))
-#dev.off()
-#
-#pdf("Heatmap_ILtreatment_goblet.pdf", height = 2)
-#print(DoHeatmap(subset(IL_dataset, idents = "goblet-cells"), 
-#                features = rownames(goblet_IL), 
-#                group.by = "treatment",
-#                label = FALSE,
-#                group.colors = colors10) + scale_fill_gradientn(colors = c("#3C9AB2", "#E8C520", "#F22300")) +
-#        theme(text = element_text(size = 6)))
-#dev.off()
-#
-#pdf("Heatmap_ILtreatment_tuft.pdf", height = 2)
-#print(DoHeatmap(subset(IL_dataset, idents = "tuft-cells"), 
-#                features = rownames(tuft_IL), 
-#                group.by = "treatment",
-#                label = FALSE,
-#                group.colors = colors10) + scale_fill_gradientn(colors = c("#3C9AB2", "#E8C520", "#F22300")) +
-#        theme(text = element_text(size = 6)))
-#dev.off()
-#
-#pdf("Heatmap_ILtreatment_keratinocytes.pdf", height = 1)
-#print(DoHeatmap(subset(IL_dataset, idents = "keratinocytes"), 
-#                features = rownames(keratinocytes_IL), 
-#                group.by = "treatment",
-#                label = FALSE,
-#                group.colors = colors10) + scale_fill_gradientn(colors = c("#3C9AB2", "#E8C520", "#F22300")) +
-#        theme(text = element_text(size = 6)))
-#dev.off()
-#
-## ---- Overlap with MS ---- #
-#
-## Load and reshape data
-#MS_IL_up <- read.csv("VolcanoPlot.csv", header = TRUE, sep = ";")
-#
-#MS_IL_up <- MS_IL_up[!duplicated(MS_IL_up$X),]
-#rownames(MS_IL_up) <- MS_IL_up$X
-#MS_IL_up <- MS_IL_up[,-1]
-#
-## Filter gene names that are up with fc > 2
-#MS_genes_IL_up <- rownames(MS_IL_up[MS_IL_up$fold.change > 2 & MS_IL_up$p < 0.05,])
-#
-#write.csv(MS_genes_IL_up, "MS_genes_IL_up.csv")
-#
-## Calculate overlap with scSeq data of all cell types
-#tuft_IL <- read.csv("tuft_cells.csv", row.names = 1, header = T)
-#goblet_IL <- read.csv("goblet_cells.csv", row.names = 1, header = T)
-#keratinocytes_IL <- read.csv("keratinocytes.csv", row.names = 1, header = T)
-#basal_IL <- read.csv("basal_cells.csv", row.names = 1, header = T)
-#
-#tuft_IL_up <- filter(tuft_IL, p_val_adj < 0.01,avg_logFC > 0)
-#goblet_IL_up <- filter(goblet_IL, p_val_adj < 0.01,avg_logFC > 0)
-#keratinocytes_IL_up <- filter(keratinocytes_IL, p_val_adj < 0.01,avg_logFC > 0)
-#basal_IL_up <- filter(basal_IL, p_val_adj < 0.01,avg_logFC > 0)
-#
-#DEG_IL_up <- c(rownames(tuft_IL_up), 
-#              rownames(goblet_IL_up), 
-#              rownames(keratinocytes_IL_up), 
-#              rownames(basal_IL_up))
-#
-#write.csv(DEG_IL_up, "DEG_IL_up.csv")
-#
+message("Calculating DEGs based on IL4/13 treatment...")
+Idents(IL_dataset) <- IL_dataset$status
+for (i in unique(IL_dataset$CellType)) {
+  print(i)
+  IL_DEG <- FindMarkers(IL_dataset, ident.1 = paste0(i, "_IL4/13"), ident.2 = paste0(i, "_EM"))
+  write.csv(IL_DEG, paste0(i, ".csv"))
+  }
+
+# ---- Plot Dotplot with seperate conditions ---- #
+tuft_IL <- read.csv("tuft_cells.csv", row.names = 1, header = T)
+goblet_IL <- read.csv("goblet_cells.csv", row.names = 1, header = T)
+keratinocytes_IL <- read.csv("keratinocytes.csv", row.names = 1, header = T)
+basal_IL <- read.csv("basal_cells.csv", row.names = 1, header = T)
+
+tuft_IL <- filter(tuft_IL, p_val_adj < 0.01)
+goblet_IL <- filter(goblet_IL, p_val_adj < 0.01)
+keratinocytes_IL <- filter(keratinocytes_IL, p_val_adj < 0.01)
+basal_IL <- filter(basal_IL, p_val_adj < 0.01)
+
+DEG_IL <- c(rownames(tuft_IL), 
+            rownames(goblet_IL), 
+            rownames(keratinocytes_IL), 
+            rownames(basal_IL))
+
+Idents(IL_dataset) <- IL_dataset$CellType
+
+pdf("ILeffect_DotPlot_allcells_p0,01.pdf", width = 23, height = 3.5)
+print(DotPlot(IL_dataset, 
+              features = unique(DEG_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_tuft_p0,01.pdf", width = 6, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "tuft-cells"), 
+              features = rownames(tuft_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_goblet_p0,01.pdf", width = 11, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "goblet-cells"), 
+              features = rownames(goblet_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_basal_p0,01.pdf", width = 9, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "basal-cells"), 
+              features = rownames(basal_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_keratinocytes_p0,01.pdf", width = 10, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "keratinocytes"), 
+              features = rownames(keratinocytes_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+tuft_IL <- filter(tuft_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
+goblet_IL <- filter(goblet_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
+keratinocytes_IL <- filter(keratinocytes_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5) %>% arrange(desc(avg_logFC))
+basal_IL <- filter(basal_IL, p_val_adj < 0.01, abs(avg_logFC) > 0.5)  %>% arrange(desc(avg_logFC))
+
+DEG_IL <- c(rownames(tuft_IL), 
+            rownames(goblet_IL), 
+            rownames(keratinocytes_IL), 
+            rownames(basal_IL))
+
+pdf("ILeffect_DotPlot_fc0,5.pdf", width = 11, height = 3.5)
+print(DotPlot(IL_dataset, 
+              features = unique(DEG_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              cols = c("#B6EAD7", "#0F99B2")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_tuft_p0,01_fc05.pdf", width = 5, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "tuft-cells"), 
+              features = rownames(tuft_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              scale.min = 0, scale.max= 100,
+              #cols = c("#B6EAD7", "#0F99B2")) + 
+              cols = c("black", "black")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_goblet_p0,01_fc05.pdf", width = 10, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "goblet-cells"), 
+              features = rownames(goblet_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              scale.min = 0, scale.max= 100,
+              #cols = c("#B6EAD7", "#0F99B2")) + 
+              cols = c("black", "black")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_basal_p0,01_fc05.pdf", width = 5, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "basal-cells"), 
+              features = rownames(basal_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              scale.min = 0, scale.max= 100,
+              #cols = c("#B6EAD7", "#0F99B2")) + 
+              cols = c("black", "black")) + 
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_DotPlot_keratinocytes_p0,01_fc05.pdf", width = 5, height = 2)
+print(DotPlot(subset(IL_dataset, idents = "keratinocytes"), 
+              features = rownames(keratinocytes_IL),
+              split.by = "treatment",
+              #group.by = "CellType",
+              dot.scale = 7,
+              scale.min = 0, scale.max= 100,
+              #cols = c("#B6EAD7", "#0F99B2")) + 
+              cols = c("black", "black")) +  
+              #scale_color_gradient(low = "white", high = "black") +
+              geom_point(aes(size=pct.exp), shape = 21, colour="black", stroke = 0.5) +  
+        RotatedAxis())
+dev.off()
+
+pdf("ILeffect_Vln_goblet_0,01_0,5_group.pdf", width = 3, height = 3)
+VlnPlot(object = subset(IL_dataset, idents = "goblet-cells"), 
+              features = rownames(goblet_IL),
+              group.by = "treatment",
+              cols = c("#B6EAD7", "#0F99B2"),
+              combine = FALSE,
+              assay = "RNA", pt.size = 1)
+dev.off()
+
+pdf("ILeffect_Vln_keratinocytes_0,01_0,5_group.pdf", width = 3, height = 3)
+VlnPlot(object = subset(IL_dataset, idents = "keratinocytes"), 
+              features = rownames(keratinocytes_IL),
+              pt.size = 0.05, 
+              group.by = "treatment",
+              cols = c("#B6EAD7", "#0F99B2"),
+              combine = FALSE,
+              assay = "RNA")
+dev.off()
+
+pdf("ILeffect_Vln_basal_0,01_0,5_group.pdf", width = 3, height = 3)
+VlnPlot(object = subset(IL_dataset, idents = "basal-cells"), 
+              features = rownames(basal_IL),
+              group.by = "treatment",
+              cols = c("#B6EAD7", "#0F99B2"),
+              combine = FALSE,
+              assay = "RNA", pt.size = 0.05)
+dev.off()
+
+pdf("ILeffect_Vln_tuft_0,01_0,5_group.pdf", width = 3, height = 3)
+VlnPlot(object = subset(IL_dataset, idents = "tuft-cells"), 
+              features = rownames(tuft_IL),
+              group.by = "treatment",
+              cols = c("#B6EAD7", "#0F99B2"),
+              combine = FALSE,
+              assay = "RNA", pt.size = 1)
+dev.off()
+
+
 ## ---- Plot UMAP of all DEGs ---- #
 #
 #for (i in DEG_IL_up) {
@@ -915,58 +920,6 @@ colors10 <- rev(c("#EB9700", "#D93B8D", "#7C60A4", "#218A9E", "#0E5245",
 #  dev.off()
 #  print(i)}
 
-
-
-## ---- Cell proportions per cell type in EM vs IL4/13---- #
-#write.csv(table(Idents(IL_dataset),IL_dataset$treatment), "cell_nb_ILtreatment.csv")
-#write.csv(prop.table(table(Idents(IL_dataset),IL_dataset$treatment)), "cell_prop_ILtreatment.csv")
-#
-## ---- Cow plots of DEG upon IL4/13 ---- #
-#theme_set(theme_cowplot())
-#tuft_cells <- subset(IL_dataset, idents = "tuft-cells")
-#Idents(tuft_cells) <- "treatment"
-#avg.tuft_cells <- as.data.frame(log1p(AverageExpression(tuft_cells, verbose = FALSE)$RNA))
-#avg.tuft_cells$gene <- rownames(avg.tuft_cells)
-#
-#goblet_cells <- subset(IL_dataset, idents = "goblet-cells")
-#Idents(goblet_cells) <- "treatment"
-#avg.goblet_cells <- as.data.frame(log1p(AverageExpression(goblet_cells, verbose = FALSE)$RNA))
-#avg.goblet_cells$gene <- rownames(avg.goblet_cells)
-#
-#keratinocyte_cells <- subset(IL_dataset, idents = "keratinocytes")
-#Idents(keratinocyte_cells) <- "treatment"
-#avg.keratinocyte_cells <- as.data.frame(log1p(AverageExpression(keratinocyte_cells, verbose = FALSE)$RNA))
-#avg.keratinocyte_cells$gene <- rownames(avg.keratinocyte_cells)
-#
-#basal_cells <- subset(IL_dataset, idents = "basal-cells")
-#Idents(basal_cells) <- "treatment"
-#avg.basal_cells <- as.data.frame(log1p(AverageExpression(basal_cells, verbose = FALSE)$RNA))
-#avg.basal_cells$gene <- rownames(avg.basal_cells)
-#
-#p1 <- ggplot(avg.tuft_cells, aes(EM, IL4.13)) + geom_point() +
-#      geom_text(hjust=0, vjust=0, label = rownames(avg.tuft_cells)) + 
-#      ggtitle("tuft_cells")
-##p1 <- LabelPoints(plot = p1, points = rownames(avg.tuft_cells)[avg.tuft_cells$EM > 1.5 | avg.tuft_cells$IL4.13 > 1.5] , repel = TRUE)
-#p2 <- ggplot(avg.goblet_cells, aes(EM, IL4.13))  + geom_point() + 
-#      geom_text(hjust=0, vjust=0, label = rownames(avg.goblet_cells)) + 
-#      ggtitle("goblet_cells")
-##p2 <- LabelPoints(plot = p2, points = rownames(avg.goblet_cells)[avg.goblet_cells$EM > 1.5 | avg.goblet_cells$IL4.13 > 1.5] , repel = TRUE)
-#p3 <- ggplot(avg.keratinocyte_cells, aes(EM, IL4.13)) + geom_point() +
-#      geom_text(hjust=0, vjust=0, label = rownames(avg.keratinocyte_cells)) + 
-#      ggtitle("keratinocyte_cells")
-##p3 <- LabelPoints(plot = p1, points = rownames(avg.keratinocyte_cells)[avg.keratinocyte_cells$EM > 1.5 | avg.keratinocyte_cells$IL4.13 > 1.5] , repel = TRUE)
-#p4 <- ggplot(avg.basal_cells, aes(EM, IL4.13)) + geom_point() +
-#      geom_text(hjust=0, vjust=0, label = rownames(avg.basal_cells)) + 
-#      ggtitle("basal_cells")
-##p4 <- LabelPoints(plot = p1, points = rownames(avg.basal_cells)[avg.basal_cells$EM > 1.5 | avg.basal_cells$IL4.13 > 1.5] , repel = TRUE)
-#
-#
-#pdf("Cowplot.pdf")
-#p1
-#p2
-#p3
-#p4
-#dev.off()
 
 # ---- UMAPs of conjunctival Goblet cells markers ---- #
 
