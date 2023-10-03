@@ -31,7 +31,7 @@ directory <- getwd()
 # Clustering analysis
 #########################################################################
 obj <- FindVariableFeatures(obj, nfeatures = 3000, assay = "RNA")
-obj <- ScaleData(obj, assay = "RNA", features = rownames(obj))
+obj <- ScaleData(obj, assay = "integrated", features = rownames(obj))
 obj <- RunPCA(obj, assay = "integrated", features = obj[['RNA']]@var.features)
 obj <- RunUMAP(obj, dims = 1:15)
 obj <- FindNeighbors(obj, dims = 1:15)
