@@ -4,4 +4,4 @@ These scripts allow to reproduce the single-cell analysis related to "Human Conj
 
 The data was deposited on: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE242382.
 
-The Seurat object containing all cells can be downloaded here: https://zenodo.org/deposit/8403667
+The Seurat object containing all cells can be downloaded here: https://zenodo.org/deposit/8403667. 
